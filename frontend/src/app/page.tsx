@@ -1,7 +1,7 @@
 // app/page.tsx
 'use client'
 import { useState } from 'react'
-import axios from 'axios'
+import axios, { AxiosError } from 'axios'
 
 export default function Home() {
     const [file, setFile] = useState<File | null>(null)
@@ -32,16 +32,23 @@ export default function Home() {
             console.log('Resposta da análise:', response.data)
             setUploadStatus('Análise concluída com sucesso!')
             setAnalysis(response.data.analysis)
-        } catch (error: any) {
+        } catch (error) {
             console.error('Erro na análise:', error)
-            if (error.code === 'ECONNREFUSED') {
-                setUploadStatus('Erro: Backend não está rodando. Verifique se o servidor está ativo na porta 8000.')
-            } else if (error.response) {
-                setUploadStatus(`Erro ${error.response.status}: ${error.response.data?.detail || error.response.data?.message || 'Erro desconhecido'}`)
-            } else if (error.request) {
-                setUploadStatus('Erro: Sem resposta do servidor. Verifique se o backend está rodando.')
+            
+            if (axios.isAxiosError(error)) {
+                // Erro do Axios
+                if (error.code === 'ECONNREFUSED') {
+                    setUploadStatus('Erro: Backend não está rodando. Verifique se o servidor está ativo na porta 8000.')
+                } else if (error.response) {
+                    setUploadStatus(`Erro ${error.response.status}: ${error.response.data?.detail || error.response.data?.message || 'Erro desconhecido'}`)
+                } else if (error.request) {
+                    setUploadStatus('Erro: Sem resposta do servidor. Verifique se o backend está rodando.')
+                } else {
+                    setUploadStatus(`Erro: ${error.message}`)
+                }
             } else {
-                setUploadStatus(`Erro: ${error.message}`)
+                // Erro genérico
+                setUploadStatus(`Erro: ${error instanceof Error ? error.message : 'Erro desconhecido'}`)
             }
         } finally {
             setIsAnalyzing(false)
