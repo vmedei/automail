@@ -59,22 +59,28 @@ jobs:
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
     steps:
       - name: Deploy Backend to Render
-        uses: johnbeynon/render-deploy-action@v1.0.0
-        with:
-          service-id: ${{ secrets.RENDER_SERVICE_ID_BACKEND }}
-          api-key: ${{ secrets.RENDER_TOKEN }}
+        run: |
+          curl -X POST "https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID_BACKEND }}/deploys" \
+            -H "Authorization: Bearer ${{ secrets.RENDER_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{"clearCache": "clear"}'
+        env:
+          RENDER_TOKEN: ${{ secrets.RENDER_TOKEN }}
 
       - name: Wait for Backend deployment
         run: sleep 30
 
       - name: Deploy Frontend to Render
-        uses: johnbeynon/render-deploy-action@v1.0.0
-        with:
-          service-id: ${{ secrets.RENDER_SERVICE_ID_FRONTEND }}
-          api-key: ${{ secrets.RENDER_TOKEN }}
+        run: |
+          curl -X POST "https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID_FRONTEND }}/deploys" \
+            -H "Authorization: Bearer ${{ secrets.RENDER_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{"clearCache": "clear"}'
+        env:
+          RENDER_TOKEN: ${{ secrets.RENDER_TOKEN }}
 
       - name: Deploy Summary
         run: |
           echo "🚀 Deploy concluído!"
-          echo "Backend: https://automail-backend.onrender.com"
-          echo "Frontend: https://automail-frontend.onrender.com"
+          echo "Backend: https://automail-o228.onrender.com"
+          echo "Frontend: https://automail-1-n5eq.onrender.com"
