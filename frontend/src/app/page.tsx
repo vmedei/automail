@@ -1,7 +1,8 @@
 // app/page.tsx
 'use client'
 import { useState } from 'react'
-import axios, { AxiosError } from 'axios'
+import axios from 'axios'
+import { API_CONFIG, buildApiUrl } from '../config/api'
 
 export default function Home() {
     const [file, setFile] = useState<File | null>(null)
@@ -23,12 +24,14 @@ export default function Home() {
         formData.append('file', file)
 
         try {
-            const response = await axios.post('http://localhost:8000/analyze', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-                timeout: 30000, // 30 segundos de timeout para análise
-            })
+            const response = await axios.post(
+                buildApiUrl(API_CONFIG.ENDPOINTS.ANALYZE), 
+                formData, 
+                {
+                    headers: API_CONFIG.UPLOAD_HEADERS,
+                    timeout: API_CONFIG.UPLOAD_TIMEOUT,
+                }
+            )
             console.log('Resposta da análise:', response.data)
             setUploadStatus('Análise concluída com sucesso!')
             setAnalysis(response.data.analysis)
@@ -38,7 +41,7 @@ export default function Home() {
             if (axios.isAxiosError(error)) {
                 // Erro do Axios
                 if (error.code === 'ECONNREFUSED') {
-                    setUploadStatus('Erro: Backend não está rodando. Verifique se o servidor está ativo na porta 8000.')
+                    setUploadStatus(`Erro: Backend não está rodando. Verifique se o servidor está ativo em ${API_CONFIG.BASE_URL}`)
                 } else if (error.response) {
                     setUploadStatus(`Erro ${error.response.status}: ${error.response.data?.detail || error.response.data?.message || 'Erro desconhecido'}`)
                 } else if (error.request) {
@@ -106,10 +109,15 @@ export default function Home() {
                         <div className="mt-6 p-3 bg-blue-50 rounded text-sm text-blue-800">
                             <strong>💡 Dica:</strong> 
                             <ul className="mt-2 list-disc list-inside">
-                                <li>Certifique-se de que o backend está rodando em http://localhost:8000</li>
-                                <li>Configure sua API key do Google Gemini no arquivo .env</li>
+                                <li>Backend configurado para: <code className="bg-blue-100 px-1 rounded">{API_CONFIG.BASE_URL}</code></li>
+                                <li>Configure sua API key do Google Gemini no arquivo .env do backend</li>
                                 <li>Use arquivos .txt ou .eml para melhor análise</li>
                             </ul>
+                        </div>
+
+                        <div className="mt-4 p-3 bg-gray-50 rounded text-xs text-gray-600">
+                            <strong>🔧 Configuração:</strong> Para alterar a URL do backend, edite o arquivo <code>.env.local</code> 
+                            na pasta do frontend e defina <code>NEXT_PUBLIC_API_URL</code>
                         </div>
                     </div>
                 </div>

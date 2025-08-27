@@ -1,36 +1,107 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AutoMail Frontend
 
-## Getting Started
+Frontend do projeto AutoMail para análise inteligente de emails usando Google Gemini.
 
-First, run the development server:
+## 🚀 Configuração do Ambiente
+
+### 1. Variáveis de Ambiente
+
+Crie um arquivo `.env.local` na raiz do projeto frontend:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Configurações da API Backend
+NEXT_PUBLIC_API_URL=http://localhost:8000
+
+# Configurações do ambiente
+NEXT_PUBLIC_ENVIRONMENT=development
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Configurações por Ambiente
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+#### Desenvolvimento (`.env.local`)
+```bash
+NEXT_PUBLIC_API_URL=http://localhost:8000
+NEXT_PUBLIC_ENVIRONMENT=development
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+#### Produção (`.env.production`)
+```bash
+NEXT_PUBLIC_API_URL=https://seu-dominio-backend.com
+NEXT_PUBLIC_ENVIRONMENT=production
+```
 
-## Learn More
+#### Teste (`.env.test`)
+```bash
+NEXT_PUBLIC_API_URL=http://localhost:8001
+NEXT_PUBLIC_ENVIRONMENT=test
+```
 
-To learn more about Next.js, take a look at the following resources:
+## 📁 Estrutura de Arquivos
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+frontend/
+├── src/
+│   ├── app/
+│   │   └── page.tsx          # Página principal
+│   └── config/
+│       └── api.ts            # Configurações da API
+├── .env.local                # Variáveis de ambiente (não versionado)
+├── .env.example              # Exemplo de configuração
+└── README.md                 # Este arquivo
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🔧 Como Usar
 
-## Deploy on Vercel
+### 1. Instalar dependências
+```bash
+npm install
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 2. Configurar variáveis de ambiente
+```bash
+cp .env.example .env.local
+# Edite o arquivo .env.local com suas configurações
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 3. Rodar em desenvolvimento
+```bash
+npm run dev
+```
+
+### 4. Build para produção
+```bash
+npm run build
+npm start
+```
+
+## 🌐 Configuração da API
+
+O frontend se conecta automaticamente ao backend usando a URL configurada em `NEXT_PUBLIC_API_URL`.
+
+### Endpoints disponíveis:
+- `GET /` - Verificação de status
+- `POST /analyze` - Análise de arquivos com Gemini
+- `POST /upload` - Upload de arquivos
+
+## 📝 Notas Importantes
+
+- **NEXT_PUBLIC_**: Variáveis que começam com `NEXT_PUBLIC_` são expostas ao cliente
+- **Segurança**: Nunca commite arquivos `.env.local` no repositório
+- **Fallback**: Se `NEXT_PUBLIC_API_URL` não estiver definida, usa `http://localhost:8000` como padrão
+
+## 🐛 Troubleshooting
+
+### Backend não responde
+1. Verifique se o backend está rodando
+2. Confirme a URL em `NEXT_PUBLIC_API_URL`
+3. Verifique se não há firewall bloqueando a conexão
+
+### Erro de CORS
+1. Verifique se o backend está configurado para aceitar requisições do frontend
+2. Confirme se as origens estão corretas no backend
+
+## 📚 Recursos Adicionais
+
+- [Next.js Environment Variables](https://nextjs.org/docs/basic-features/environment-variables)
+- [Axios Documentation](https://axios-http.com/)
+- [Tailwind CSS](https://tailwindcss.com/)
