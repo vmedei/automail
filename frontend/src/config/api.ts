@@ -4,8 +4,8 @@ export const API_CONFIG = {
   BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
   
   // Timeouts
-  UPLOAD_TIMEOUT: 30000, // 30 segundos para upload
-  REQUEST_TIMEOUT: 10000, // 10 segundos para outras requisições
+  UPLOAD_TIMEOUT: 60000, // 30 segundos para upload
+  REQUEST_TIMEOUT: 30000, // 10 segundos para outras requisições
   
   // Endpoints
   ENDPOINTS: {
