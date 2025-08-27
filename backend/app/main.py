@@ -18,7 +18,11 @@ app = FastAPI(title="AutoMail API", version="1.0.0")
 # Configuração do CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"], 
+    allow_origins=[
+        "http://localhost:3000",  # Desenvolvimento local
+        "https://automail-1-n5eq.onrender.com",  # Frontend no Render
+        "https://automail-o228.onrender.com",     # Backend no Render
+    ], 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
