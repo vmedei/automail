@@ -61,7 +61,7 @@ async def upload_file(file: UploadFile = File(...)):
 
 @app.post("/analyze")
 async def analyze_file(file: UploadFile = File(...)):
-    """Analisa arquivo usando o Gemini"""
+    """Analisa arquivo usando o Gemini com classificação e sugestões de resposta"""
     logger.info("Solicitação de análise recebida")
     
     try:
@@ -69,27 +69,64 @@ async def analyze_file(file: UploadFile = File(...)):
         file_content = await file.read()
         file_content = file_content.decode("utf-8")
         
-        # Prompt para análise
+        # Prompt para análise mais estruturada e resumida
         prompt = f"""
-        Analise o seguinte conteúdo de email/arquivo e forneça:
-        1. Resumo do conteúdo
-        2. Pontos principais
-        3. Sugestões de ação (se aplicável)
-        4. Classificação do tipo de email
-        
-        Conteúdo:
+        Analise o email e responda APENAS com JSON válido, sendo EXTREMAMENTE SUCINTO.
+
+        EMAIL:
         {file_content}
+
+        REGRAS:
+        - Responda APENAS com JSON válido, sem texto adicional
+        - Seja MUITO DIRETO e OBJETIVO
+        - Máximo 1-2 frases para cada campo
+        - Sem rodeios ou explicações desnecessárias
+
+        FORMATO JSON OBRIGATÓRIO:
+        {{
+            "categoria": "produtivo" ou "improdutivo",
+            "resumo": "resumo em 1 frase máxima",
+            "acao_necessaria": "sim" ou "não",
+            "sugestao_resposta": "1 frase direta",
+            "prioridade": "baixa", "média" ou "alta"
+        }}
+
+        CRITÉRIOS SIMPLES:
+        - PRODUTIVO: requer ação (suporte, dúvida, solicitação, convocação)
+        - IMPRODUTIVO: informativo (agradecimento, felicitação)
+        - PRIORIDADE: alta (urgente), média (importante), baixa (informativo)
+
+        LEMBRE-SE: Seja EXTREMAMENTE SUCINTO. Máximo 1 frase por campo.
         """
         
         # Gera resposta usando o Gemini
         response = model.generate_content(prompt)
-        
-        logger.info("Análise concluída com sucesso")
-        return {
-            "analysis": response.text,
-            "filename": file.filename,
-            "model": "gemini-2.5-flash"
-        }
+
+        # Tenta fazer o parse da resposta JSON
+        try:
+            import json
+            analysis_data = json.loads(response.text.strip())
+            logger.info("Análise estruturada concluída com sucesso")
+            return {
+                "analysis": analysis_data,
+                "filename": file.filename,
+                "model": "gemini-2.5-flash"
+            }
+        except json.JSONDecodeError:
+            # Fallback se o Gemini não retornar JSON válido
+            logger.warning("Gemini não retornou JSON válido, usando resposta de texto")
+            return {
+                "analysis": {
+                    "categoria": "indefinido",
+                    "resumo": "Análise automática concluída",
+                    "acao_necessaria": "sim",
+                    "sugestao_resposta": "Por favor, revise manualmente este email.",
+                    "prioridade": "média"
+                },
+                "filename": file.filename,
+                "model": "gemini-2.5-flash",
+                "raw_response": response.text
+            }
         
     except Exception as e:
         logger.error(f"Erro na análise: {str(e)}")
